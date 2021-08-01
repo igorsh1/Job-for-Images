@@ -1,6 +1,6 @@
-﻿//using System;
+﻿using System;
 using static System.Console;
-//using static JobForImages.ViewingLayer.View;
+using static JobForImages.View.Visualize;
 using static JobForImages.Model.AuxiliaryFunctions;
 using JobForImages.Model;
 //using JobForImages.Controller;
@@ -11,44 +11,60 @@ namespace JobForImages
     {
         public static class AuxiliaryFunctions
         {
-           public static void InputIntValue(string text, out int value)
+           public static void InputIntValue(string text, out int value, int lBound, int hBound)
             {
                 bool notParsed;
-                Write(text);
+                ForegroundColor = ConsoleColor.DarkCyan;
+                Write(text);  //для мене так більш наочніше ніж в різних рядках
                 do
                 {
+                    ForegroundColor = ConsoleColor.Yellow;
                     if(notParsed = !int.TryParse(ReadLine(),out value)) 
-                {
+                {                        
+                        MyResetColor();
                         Write("Введене значення не є натуральним числом. Спробуйте ще раз! : ");
                 }  
-                else if (value<1)
+                else if (value<lBound || value>hBound)
                 {
-                        Write("Значення має бути бiльше нуля! Спробуйте ще раз! : ");  
+                        MyResetColor();
+                        Write($"Значення має бути вiд {lBound} до {hBound}! Спробуйте ще раз! : ");  
                         notParsed = true;
                 }                 
                 } while (notParsed);
-            }   
+                MyResetColor();
+            } 
+            public static void MyResetColor()//потрібно для коректного відображення при запуску в PowerShell
+            {                               //для PowerShell в IDE і так все коректно працює
+                ResetColor();
+                BackgroundColor = ConsoleColor.Black;
+            }  
         }
 /*
 * в класі Job реалізовано функціонал завдання з обробки зображень
-* клас Crew є елементом цього класу як бригада робітників, хоча можна було і навпаки
-* зробити Job як завдання для певної бригади, що реалізує клас Crew
+* клас Crew є елементом цього класу як команда робітників, хоча можна було і навпаки
+* зробити Job як завдання для певної команда, що реалізує клас Crew
 * defaultImageAmount - дефолтне значення для кількості зображень, використ при невірному 
 * значені  ImageAmount
 * imageAmount - кількість зображень для обробки 
-* currentCrew - бригада робітників, що виконує дане завдання
+* currentCrew - команда робітників, що виконує дане завдання
 */
         class Job        
         {
+            public static int lowImageAmount = 1; //public тимчасово поки нема проперті
+            public static int highImageAmount = 10000; //public тимчасово поки нема проперті
             static private int defaultImageAmount = 1000;
+            public static int DefaultImageAmount { 
+                
+                get { return defaultImageAmount; } 
+            }
             private int imageAmount;
             public int ImageAmount { 
                 set
-                {
-                    if (value < 1)
+                {   //ця перевірка вже не актуальна, залишив може напряму десь буде встановлюватись
+                    if (value < lowImageAmount || value > highImageAmount)
                     {
                         WriteLine("Недопустипе значення кількості зображень, задано значення по замовчуванню");
-                        imageAmount = defaultImageAmount;
+                        imageAmount = DefaultImageAmount;
                     }
                     else
                     {
@@ -57,7 +73,7 @@ namespace JobForImages
                 }
                 get { return imageAmount; } 
             }
-            Crew currentCrew;
+            public Crew currentCrew;
             public Job(int amount, Crew crew)
             {
                 ImageAmount = amount;
@@ -65,12 +81,12 @@ namespace JobForImages
             }
             static public void SetDefaultImageAmount()
             {
-                InputIntValue("Введiть кiлькiсть зображень за замовчуванням: ",out defaultImageAmount);            
+                InputIntValue("Введiть кiлькiсть зображень за замовчуванням: ",out defaultImageAmount,Job.lowImageAmount,Job.highImageAmount);            
             }
             public double calcTime()
             {
                 //int taskAmount = 0;
-                int imageAmount= this.ImageAmount;
+                int imageAmount= ImageAmount;
                 while (imageAmount>0)
                 {
                     
@@ -91,22 +107,29 @@ namespace JobForImages
             }
         }
 /*
-* в класі Crew реалізовано функціонал бригади робітників, які представлені класом Worker
+* в класі Crew реалізовано функціонал команди робітників, які представлені класом Worker
 * crew - масив з робітниками
 * 
 */
         class Crew
-        {
-            int[] workerSpeed = { 2, 3, 4};
-            static private int defaultWorkerAmount = 3;
+        {           
+            public static int lowWorkerAmount = 1; //public тимчасово поки нема проперті
+            public static int highWorkerAmount = 100;//public тимчасово поки нема проперті
+            public static int lowWorkerSpeed = 1; //public тимчасово поки нема проперті
+            public static int highWorkerSpeed = 10; //public тимчасово поки нема проперті
+            private static int defaultWorkerAmount = 3;
+            public static int DefaultWorkerAmount { 
+                
+                get { return defaultWorkerAmount; } 
+            }
             private int workerAmount;
             public int WorkerAmount { 
                 set
-                {
-                    if (value < 1)
+                {   //ця перевірка вже не актуальна, залишив може напряму десь буде встановлюватись
+                    if (value < lowWorkerAmount || value > highWorkerAmount) 
                     {
                         WriteLine("Недопустипе значення кількості працівників, задано значення по замовчуванню");
-                        workerAmount = defaultWorkerAmount;
+                        workerAmount = DefaultWorkerAmount;
                     }
                     else
                     {
@@ -115,13 +138,22 @@ namespace JobForImages
                 }
                 get { return workerAmount; } 
             }
-            Worker[] crew;
-            public Crew(int workerAmount)
-            {
-                crew = new Worker [workerAmount]; //створив масив що містить робітників            
+            public Worker[] crew;
+            public Crew(int workerAmount, int[] workerSpeed)
+            {   
+                WorkerAmount = workerAmount;
+                crew = new Worker [WorkerAmount]; //створив масив що містить робітників            
                 for (int i = 0; i < crew.Length; i++)
                 {
-                    crew[i] = new Worker($"worker{i}",workerSpeed[i]);
+                    if (workerSpeed.Length<workerAmount)//перестраховка на некоректні данні через не повністтю дороблений функціонал
+                    {                                   
+                      crew[i] = new Worker($"worker{i}",workerSpeed[i%workerSpeed.Length]);  
+                    } 
+                    else
+                    {
+                        crew[i] = new Worker($"worker{i}",workerSpeed[i]);
+                    }
+                    
                 } 
             }        
             public Worker this[int index]
@@ -137,9 +169,10 @@ namespace JobForImages
             }
             static public void SetDefaultWorkerAmount()
             {
-                InputIntValue("Введiть кiлькiсть працiвникiв за замовчуванням: ",out defaultWorkerAmount);            
+                InputIntValue("Введiть кiлькiсть працiвникiв за замовчуванням: ",out defaultWorkerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);            
             }
         }
+
     }
     namespace Controller
     {   
@@ -147,16 +180,78 @@ namespace JobForImages
         {        
             static void Main(string[] args)
             {
-                //Crew crew = new Crew(3);
+                Job job = null;
+                char choice;
+                BackgroundColor = ConsoleColor.Black;//потрібно для коректного відображення при запуску в PowerShell
+                RefreshConsole(job);
+                ShowNextStep();                
+                do
+                {
+                    choice = ReadKey().KeyChar;
+                    RefreshConsole(job);   
+                    WriteLine();
+                    
+                    switch (choice)
+                    {
+                        case '1':
+                            ShowDefaultSettings();
+                            break;
+                        case '2':
+                            job = CreateNewJobManual();
+                            RefreshConsole(job);
+                            break;
+                        case '3':
+                            job = CreateStandartJob();
+                            RefreshConsole(job);
+                            break;
+                        case '4':
+                        break;
+                        case '5':
+                        break;
+                        case '6':
+                            SetAllDefaultSettings();
+                            break;
+                        case '7':
+                        break;
+                        case '8':
+                        break;
+                        case '9':
+                        break;
+                    }
+                    ShowNextStep();
+                } while (choice != 'x');
                 //Job job = new Job(1000, crew);
-                CreateNewJobManual();
+                //Job job = CreateNewJobManual();
+                //ShowDefaultSettings(Job.DefaultImageAmount,Crew.DefaultWorkerAmount);
+            }
+            private static Job CreateStandartJob()
+            {
+               int[] workerSpeed = { 2, 3, 4};
+               return new Job(Job.DefaultImageAmount, new Crew(Crew.DefaultWorkerAmount, workerSpeed)); 
             }
             
-            private static void CreateNewJobManual()
+            private static Job CreateRandomNewJob()
+            {                
+                Random genRandom = new Random();
+                int imagesAmount = genRandom.Next(Job.lowImageAmount, Job.highImageAmount);
+                int workersAmount = genRandom.Next(Crew.lowWorkerAmount, Crew.highWorkerAmount);
+                int[] workerSpeed = new int[workersAmount];
+                for (int i = 0; i < workersAmount; i++)
+                {
+                    workerSpeed[i] = genRandom.Next(Crew.lowWorkerSpeed,Crew.highWorkerSpeed);  
+                }                 
+                return CreateNewJob(imagesAmount, workersAmount, workerSpeed);
+            }
+            //цей метод лише для можливості 
+            private static Job CreateNewJob(int imagesAmount, int workersAmount, int[] workerSpeed) =>
+                new Job(imagesAmount, new Crew(workersAmount, workerSpeed));
+            
+            private static Job CreateNewJobManual()
             {           
                 int imageAmount, workerAmount;            
-                InputIntValue("Введiть кiлькiсть зображень для обробки: ",out imageAmount);
-                InputIntValue("Введiть кiлькiсть працiвникiв для виконання завдання: ",out workerAmount);    
+                InputIntValue("Введiть кiлькiсть зображень для обробки: ",out imageAmount, Job.lowImageAmount, Job.highImageAmount);
+                InputIntValue("Введiть кiлькiсть працiвникiв для виконання завдання: ",out workerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);    
+                return new Job(imageAmount, CreateNewCrewManual(workerAmount));
             }        
             private static void SetAllDefaultSettings()
             {
@@ -164,16 +259,104 @@ namespace JobForImages
                 Job.SetDefaultImageAmount();
 
             }
+            private static Crew CreateNewCrewManual(int amount)
+            {
+                string choice;
+                ForegroundColor = ConsoleColor.DarkGreen;
+                WriteLine("Створюємо бригаду"); MyResetColor();               
+                int[] workerSpeed = new int[amount];
+                Random genRandom = new Random();
+                Write("Згенерувати продуктивнiсть працiвникiв автоматично? (y/n): ");                              
+                choice = ReadLine();
+                if ("y" == choice || "Y" == choice || "" == choice)
+                {
+                    for (int i = 0; i < amount; i++)
+                    {
+                        workerSpeed[i] = genRandom.Next(Crew.lowWorkerSpeed,Crew.highWorkerSpeed);
+                    } 
+                }
+                else
+                {
+                    for (int i = 0; i < amount; i++)
+                    {
+                    InputIntValue($"Введiть продуктивнiсть {i+1} працiвника: ", out workerSpeed[i], Crew.lowWorkerSpeed, Crew.highWorkerSpeed);                  
+                    }
+                }
+                return new Crew(amount, workerSpeed);
+            }
+            private static void ShowDefaultSettings()
+            {
+                ShowJobSettings("Параметри по замовчуванню для завдання:",Job.DefaultImageAmount,Crew.DefaultWorkerAmount);
+            }
         }
     }
     namespace View
     {
         public static class Visualize
         {            
-            public static void ShowDefaultSettings()
+            public static void ShowJobSettings(string text, int images, int worker)
             {
-
+                ForegroundColor = ConsoleColor.DarkCyan;
+                WriteLine(text);
+                MyResetColor(); Write("   -кiлькiсть зображень ");
+                ForegroundColor = ConsoleColor.Yellow; WriteLine(images);
+                MyResetColor(); Write("   -кiлькiсть працiвникiв ");
+                ForegroundColor = ConsoleColor.Yellow; WriteLine(worker);                
+                MyResetColor(); 
             }
+            public static void ShowMenu()
+            {
+                ForegroundColor = ConsoleColor.DarkCyan;                
+                WriteLine();
+                WriteLine("|       1       |       2       |       3       |       4       |       5       |       6       |"); 
+                WriteLine("|ShowDefSettings| NewJobManual  | NewStandartJob|  NewRandomJob |   Statistics  | SetDefSettings|");
+                MyResetColor(); 
+                WriteLine("________________________________________________________________________________________________"); 
+                
+            }
+            public static void ShowJobInfo(in object job)
+            {
+                if (job == null)
+                {
+                    WriteLine();
+                    WriteLine("Немає жодного поточного завдання. Ви можете його створити натиснувши 2, 3 або 4 ");                   
+                }
+                else
+                {
+                    ShowJobSettings("Параметри поточного завдання:", (job as Job).ImageAmount, (job as Job).currentCrew.WorkerAmount);                     
+                    ShowWorkerSpeed(job);
+                } 
+                 WriteLine();               
+                WriteLine("________________________________________________________________________________________________");
+            }
+            public static void ShowWorkerSpeed(in object job)
+            {
+                Worker[] crew = (job as Job).currentCrew.crew;
+                Write("   -продуктивнiсть працiвникiв (№/хв.): ");
+                int i;
+                for (i = 0; i < crew.Length-1; i++)
+                {
+                    if (i%10 == 0)  WriteLine();                    
+                    Write($"({i+1}/{crew[i].Speed}), "); 
+                }
+                 Write($"({i+1}/{crew[i].Speed})");
+            }
+                
+            public static void ShowNextStep()
+            {
+                ForegroundColor = ConsoleColor.DarkGreen;                
+                WriteLine(); 
+                Write("Будь-ласка виберiть наступну команду або 'x' для виходу: ");
+                MyResetColor();   
+            }
+             public static void RefreshConsole(in object job)
+             {
+                Clear();
+                ShowMenu();
+                ShowJobInfo(job); 
+             }
         }
+            
+        
     }
 }
