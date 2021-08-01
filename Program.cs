@@ -15,19 +15,21 @@ namespace JobForImages
             {
                 bool notParsed;
                 ForegroundColor = ConsoleColor.DarkCyan;
-                Write(text);  //для мене так більш наочніше ніж в різних рядках
+                Write(text);  
                 do
                 {
                     ForegroundColor = ConsoleColor.Yellow;
                     if(notParsed = !int.TryParse(ReadLine(),out value)) 
                 {                        
                         MyResetColor();
-                        Write("Введене значення не є натуральним числом. Спробуйте ще раз! : ");
+                        Write("The value entered is not a natural number. Please try again! : ");
+                        //Write("Введене значення не є натуральним числом. Спробуйте ще раз! : ");
                 }  
                 else if (value<lBound || value>hBound)
                 {
                         MyResetColor();
-                        Write($"Значення має бути вiд {lBound} до {hBound}! Спробуйте ще раз! : ");  
+                        Write($"The value must be from {lBound} to {hBound}! Please try again! : "); 
+                        //Write($"Значення має бути вiд {lBound} до {hBound}! Спробуйте ще раз! : "); 
                         notParsed = true;
                 }                 
                 } while (notParsed);
@@ -63,7 +65,8 @@ namespace JobForImages
                 {   //ця перевірка вже не актуальна, залишив може напряму десь буде встановлюватись
                     if (value < lowImageAmount || value > highImageAmount)
                     {
-                        WriteLine("Недопустипе значення кількості зображень, задано значення по замовчуванню");
+                        WriteLine("Invalid number of images. Default value is set.");
+                        //WriteLine("Недопустипе значення кількості зображень, задано значення по замовчуванню");
                         imageAmount = DefaultImageAmount;
                     }
                     else
@@ -81,7 +84,8 @@ namespace JobForImages
             }
             static public void SetDefaultImageAmount()
             {
-                InputIntValue("Введiть кiлькiсть зображень за замовчуванням: ",out defaultImageAmount,Job.lowImageAmount,Job.highImageAmount);            
+                InputIntValue("Enter default number of images: ",out defaultImageAmount,Job.lowImageAmount,Job.highImageAmount);
+                //InputIntValue("Введiть кiлькiсть зображень за замовчуванням: ",out defaultImageAmount,Job.lowImageAmount,Job.highImageAmount);            
             }
             public double calcTime()
             {
@@ -128,7 +132,8 @@ namespace JobForImages
                 {   //ця перевірка вже не актуальна, залишив може напряму десь буде встановлюватись
                     if (value < lowWorkerAmount || value > highWorkerAmount) 
                     {
-                        WriteLine("Недопустипе значення кількості працівників, задано значення по замовчуванню");
+                        WriteLine("Invalid value of number of workers. Default value is set.");
+                        //WriteLine("Недопустипе значення кількості працівників, задано значення по замовчуванню");
                         workerAmount = DefaultWorkerAmount;
                     }
                     else
@@ -169,7 +174,8 @@ namespace JobForImages
             }
             static public void SetDefaultWorkerAmount()
             {
-                InputIntValue("Введiть кiлькiсть працiвникiв за замовчуванням: ",out defaultWorkerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);            
+                InputIntValue("Enter the number of workers by default: ",out defaultWorkerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);
+                //InputIntValue("Введiть кiлькiсть працiвникiв за замовчуванням: ",out defaultWorkerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);            
             }
         }
 
@@ -249,8 +255,10 @@ namespace JobForImages
             private static Job CreateNewJobManual()
             {           
                 int imageAmount, workerAmount;            
-                InputIntValue("Введiть кiлькiсть зображень для обробки: ",out imageAmount, Job.lowImageAmount, Job.highImageAmount);
-                InputIntValue("Введiть кiлькiсть працiвникiв для виконання завдання: ",out workerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);    
+                InputIntValue("Enter the number of images to process: ",out imageAmount, Job.lowImageAmount, Job.highImageAmount);
+                InputIntValue("Enter the number of workers to complete the task: ",out workerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);    
+                //InputIntValue("Введiть кiлькiсть зображень для обробки: ",out imageAmount, Job.lowImageAmount, Job.highImageAmount);
+                //InputIntValue("Введiть кiлькiсть працiвникiв для виконання завдання: ",out workerAmount, Crew.lowWorkerAmount, Crew.highWorkerAmount);
                 return new Job(imageAmount, CreateNewCrewManual(workerAmount));
             }        
             private static void SetAllDefaultSettings()
@@ -263,10 +271,12 @@ namespace JobForImages
             {
                 string choice;
                 ForegroundColor = ConsoleColor.DarkGreen;
-                WriteLine("Створюємо бригаду"); MyResetColor();               
+                WriteLine("Creating a crew..."); MyResetColor();  
+                //WriteLine("Створюємо команду"); MyResetColor();              
                 int[] workerSpeed = new int[amount];
                 Random genRandom = new Random();
-                Write("Згенерувати продуктивнiсть працiвникiв автоматично? (y/n): ");                              
+                Write("Generate employee productivity automatically?  (y/n): ");  
+                //Write("Згенерувати продуктивнiсть працiвникiв автоматично? (y/n): ");                             
                 choice = ReadLine();
                 if ("y" == choice || "Y" == choice || "" == choice)
                 {
@@ -279,14 +289,16 @@ namespace JobForImages
                 {
                     for (int i = 0; i < amount; i++)
                     {
-                    InputIntValue($"Введiть продуктивнiсть {i+1} працiвника: ", out workerSpeed[i], Crew.lowWorkerSpeed, Crew.highWorkerSpeed);                  
+                    InputIntValue($"Enter productivity for employee number {i + 1}: ", out workerSpeed[i], Crew.lowWorkerSpeed, Crew.highWorkerSpeed); 
+                    //InputIntValue($"Введiть продуктивнiсть {i+1} працiвника: ", out workerSpeed[i], Crew.lowWorkerSpeed, Crew.highWorkerSpeed);                 
                     }
                 }
                 return new Crew(amount, workerSpeed);
             }
             private static void ShowDefaultSettings()
             {
-                ShowJobSettings("Параметри по замовчуванню для завдання:",Job.DefaultImageAmount,Crew.DefaultWorkerAmount);
+                ShowJobSettings("Default settings for the task:",Job.DefaultImageAmount,Crew.DefaultWorkerAmount);
+                //ShowJobSettings("Параметри по замовчуванню для завдання:",Job.DefaultImageAmount,Crew.DefaultWorkerAmount);
             }
         }
     }
@@ -298,9 +310,11 @@ namespace JobForImages
             {
                 ForegroundColor = ConsoleColor.DarkCyan;
                 WriteLine(text);
-                MyResetColor(); Write("   -кiлькiсть зображень ");
+                MyResetColor(); Write("   -number of images  ");
+                //MyResetColor(); Write("   -кiлькiсть зображень ");
                 ForegroundColor = ConsoleColor.Yellow; WriteLine(images);
-                MyResetColor(); Write("   -кiлькiсть працiвникiв ");
+                MyResetColor(); Write("   -number of employees ");
+                //MyResetColor(); Write("   -кiлькiсть працiвникiв ");
                 ForegroundColor = ConsoleColor.Yellow; WriteLine(worker);                
                 MyResetColor(); 
             }
@@ -319,11 +333,13 @@ namespace JobForImages
                 if (job == null)
                 {
                     WriteLine();
-                    WriteLine("Немає жодного поточного завдання. Ви можете його створити натиснувши 2, 3 або 4 ");                   
+                    WriteLine("There are no current tasks. You can create it by pressing 2, 3 or 4");
+                    //WriteLine("Немає жодного поточного завдання. Ви можете його створити натиснувши 2, 3 або 4 ");                   
                 }
                 else
                 {
-                    ShowJobSettings("Параметри поточного завдання:", (job as Job).ImageAmount, (job as Job).currentCrew.WorkerAmount);                     
+                    ShowJobSettings("Current task parameters: ", (job as Job).ImageAmount, (job as Job).currentCrew.WorkerAmount);
+                    //ShowJobSettings("Параметри поточного завдання:", (job as Job).ImageAmount, (job as Job).currentCrew.WorkerAmount);                 
                     ShowWorkerSpeed(job);
                 } 
                  WriteLine();               
@@ -332,7 +348,8 @@ namespace JobForImages
             public static void ShowWorkerSpeed(in object job)
             {
                 Worker[] crew = (job as Job).currentCrew.crew;
-                Write("   -продуктивнiсть працiвникiв (№/хв.): ");
+                Write("   -productivity of employees (#/min.): ");
+                //Write("   -продуктивнiсть працiвникiв (№/хв.): ");
                 int i;
                 for (i = 0; i < crew.Length-1; i++)
                 {
@@ -346,7 +363,8 @@ namespace JobForImages
             {
                 ForegroundColor = ConsoleColor.DarkGreen;                
                 WriteLine(); 
-                Write("Будь-ласка виберiть наступну команду або 'x' для виходу: ");
+                Write("Please select the next command or 'x' to exit: ");
+                //Write("Будь-ласка виберiть наступну команду або 'x' для виходу: ");
                 MyResetColor();   
             }
              public static void RefreshConsole(in object job)
